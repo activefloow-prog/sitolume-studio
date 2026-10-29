@@ -1,0 +1,7 @@
+Original site template: CHROMA by FORMWORK / shellcat-com, MIT license, original code modified only for SitoLume branding, content, navigation and colors. Preserve LICENSE-CHROMA-MIT.txt and original LICENSE.
+FAQ widget: No-fee FAQ chatbot by TCH Works, MIT license; adapted for Italian and SitoLume, with original source and LICENSE-FAQ-MIT.txt.
+Animation library: GSAP 3.12.5 and ScrollTrigger 3.12.5, GreenSock/Webflow standard no-charge license: https://gsap.com/standard-license. Used commercially, no paid subscription.
+All JS files self-hosted. No photo assets from actual clients; do not claim any testimonial or completed project.
+Source original template: https://github.com/shellcat-com/formwork-chroma
+FAQ original source: https://github.com/wilsonryan-hue/no-fee-faq-chatbot
+No API key; no LLM provider; FAQ matches approved answers locally, not generative AI.
