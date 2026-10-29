@@ -1,0 +1,3 @@
+SitoLume World, release 2026-10-29.
+Adapted from LerSent001/pokepia-town (MIT license, copyright 2026 LerSent001). https://github.com/LerSent001/pokepia-town
+Preserves the existing A* pathfinding, rigged original player, Blender-authored village, rendering, water and camera. The protected Pokémon logo, Pokémon resident models and Pokéball shapes were removed. Village colors, labels and links are customized for SitoLume. Uses Three.js MIT and Draco Apache-2.0. This is a single-user browser experience, not a multiplayer service. No Lume Coin can be bought or converted to money.
