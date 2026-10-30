@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://activefloow-prog.github.io/sitolume-studio/sitemap.xml
