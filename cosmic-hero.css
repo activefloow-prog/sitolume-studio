@@ -1,0 +1,8 @@
+/* SitoLume Cosmic Network — responsive, progressive-enhancement layer */
+.sl-hero-3d{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 80% 30%,rgba(135,91,36,.15),transparent 60%),#08080a}
+#sl-cosmic-bg{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.55}
+.sl-hero-3d>:not(#sl-cosmic-bg){position:relative;z-index:1}
+.sl-hero-3d:before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,rgba(7,7,10,.78) 0%,rgba(7,7,10,.25) 65%,rgba(7,7,10,.35) 100%)}
+.sl-3d-stage{filter:drop-shadow(0 18px 38px rgba(202,139,51,.1))}
+@media(max-width:800px){#sl-cosmic-bg{opacity:.2}.sl-hero-3d:before{background:rgba(7,7,10,.55)}}
+@media(prefers-reduced-motion:reduce){#sl-cosmic-bg{display:none!important}}
