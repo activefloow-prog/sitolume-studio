@@ -1,0 +1,44 @@
+name: Luca Visual Review - Cloud Only
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pure cloud renderer
+        run: python -m pip install --quiet Pillow==11.3.0
+      - name: Render original feed post, full carousel, Stories and Reel frames
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="social/preview/$(date -u +%Y-%m-%d)"
+          python social/luca_cloud_studio.py --out "$ROOT"
+          python - "$ROOT" <<'PY'
+          import json,sys
+          from pathlib import Path
+          from PIL import Image
+          base=Path(sys.argv[1])
+          manifest=json.loads((base/'manifest.json').read_text())
+          for item in [manifest["story"],manifest["post"],*manifest["carousel"],*manifest["reel_frames"]]:
+              with Image.open(base/item) as im:
+                  assert im.width==1080
+                  assert im.height in (1350,1920)
+                  assert im.mode=="RGB"
+              assert (base/item).stat().st_size<8000000
+          print("Verified all original social images in cloud")
+          PY
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ROOT"
+          if ! git diff --cached --quiet; then
+            git commit -m "Luca cloud: QA preview post, 5 carousel, story and reel frames"
+            git pull --rebase origin main
+            git push
+          fi
