@@ -144,7 +144,13 @@ def draw_person(im: Image.Image, face: Image.Image, x: int, y: int, height: int)
     w=figure.width
     cx=x+w//2;cy=y+height//2
     ring.ellipse((cx-495,cy-520,cx+495,cy+515),outline=(180,139,70,120),width=7)
-    layer.alpha_composite(figure,(x,y))
+    # Composite only the visible portrait area; portrait assets may exceed frame.
+    left=max(0,x);top=max(0,y)
+    right=min(W,x+figure.width);bottom=min(H,y+figure.height)
+    if right<=left or bottom<=top:
+        raise ValueError("Portrait outside frame")
+    fragment=figure.crop((left-x,top-y,right-x,bottom-y))
+    layer.alpha_composite(fragment,(left,top))
     im.alpha_composite(layer)
 
 
