@@ -1,0 +1,12 @@
+{
+  "voice": "serena",
+  "lipsync_model": "TMElyralab/MuseTalk v1.5",
+  "method": "real audio-conditioned lip generation",
+  "test_clip_seconds": 18.48,
+  "output": "reel-serena-musetalk-test.mp4",
+  "verified": true,
+  "requires_visual_owner_review": true,
+  "instagram_posted": false,
+  "cost_mode": "free public GitHub Actions CPU",
+  "source": "Sito Lume Ryan/Serena and synthetic CC0 virtual presenter"
+}
