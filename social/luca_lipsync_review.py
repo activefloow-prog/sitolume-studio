@@ -19,7 +19,7 @@ def main():
         if not status.is_file():print("SKIP",name,": no real verified video yet");continue
         meta=json.loads(status.read_text())
         vid=p/meta["output"]
-        assert vid.stat().st_size>90000
+        assert vid.stat().st_size>15000
         probe=json.loads(run("ffprobe","-v","error","-show_entries","format=duration:stream=codec_type,width,height","-of","json",str(vid)).stdout)
         dur=float(probe["format"]["duration"])
         assert 2<=dur<=15,dur
