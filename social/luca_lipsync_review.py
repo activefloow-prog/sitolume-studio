@@ -37,7 +37,7 @@ def main():
         draw=ImageDraw.Draw(sheet)
         for i,img in enumerate(frames):
             sheet.paste(img,(w*i,52))
-            draw.text((w*i+12,14),f"{name.upper()}  {(.5,.25,2.0,2.75,3.5)[i]}s",font=font,fill=(233,194,112))
+            draw.text((w*i+12,14),f"{name.upper()}  {(.5,1.25,2.0,2.75,3.5)[i]}s",font=font,fill=(233,194,112))
         movement=[]
         for a,b in zip(frames[:-1],frames[1:]):
             diff=ImageChops.difference(a,b)
