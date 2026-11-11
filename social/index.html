@@ -32,6 +32,11 @@ button{font:inherit;background:#edc270;color:#18120b;border:0;border-radius:10px
 <div class="supra">Instagram · @sitolume_studio · Bozze originali</div>
 <h1>Un'identità<br>che si riconosce.</h1>
 <p class="lead">Post, caroselli, Stories e Reel progettati per raccontare Sito Lume. Tutto renderizzato nel cloud e pronto per la revisione: nessun render sul Mac, nessuna pubblicazione senza verifica.</p>
+<div class="section"><h2>Nuovo Cinema Studio · Avatar</h2><span class="sub" id="cinemaStatus">Verifica render in cloud…</span></div>
+<div class="grid" id="cinemaVideos"></div>
+<div class="section"><h2>Copertine e caroselli avatar</h2><span class="sub">Presentatori sintetici originali CC0 · non sono persone reali · lipsync non attivo</span></div>
+<div class="grid" id="cinemaImages"></div>
+<div class="info">Nuova regia: movimento di camera, stacchi cinematografici, ambientazioni nero-oro e presentatori virtuali. La voce è Ryan o Serena. Gli avatar sono sintetici; non sono riprese reali né lipsync fotorealistico. <a class="link" href="https://github.com/visualizevalue/headshots" target="_blank" rel="noopener">Portrait CC0</a>.</div>
 <div class="section"><h2>Materiali social</h2><span class="sub" id="edition">Cerco l'ultima produzione verificata…</span></div>
 <div class="grid" id="visuals"></div>
 <div class="section"><h2>Reel e voci</h2><span class="sub">Ryan (maschile) · Serena (femminile) · Qwen3-TTS</span></div>
@@ -49,6 +54,25 @@ const repo="https://api.github.com/repos/activefloow-prog/sitolume-studio/conten
 const raw="https://raw.githubusercontent.com/activefloow-prog/sitolume-studio/main/social/";
 const pic=(label,url,tall)=>{const a=document.createElement("a");a.className="card"+(tall?" tall":"");a.href=url;a.target="_blank";a.rel="noopener noreferrer";const img=document.createElement("img");img.src=url;img.loading="lazy";img.alt=label;const footer=document.createElement("footer");const name=document.createElement("b");name.textContent=label;const span=document.createElement("span");span.textContent="Apri JPG";footer.append(name,span);a.append(img,footer);return a};
 const video=(label,url,available)=>{const div=document.createElement("div");div.className="card tall";if(available){const v=document.createElement("video");v.controls=true;v.preload="none";v.src=url;v.playsInline=true;div.append(v)}else{const p=document.createElement("p");p.style.padding="22px";p.textContent="Il Reel non è ancora stato generato o verificato.";div.append(p)}const footer=document.createElement("footer");const n=document.createElement("b");n.textContent=label;const st=document.createElement("span");st.textContent=available?"MP4 disponibile":"Da generare";footer.append(n,st);div.append(footer);return div};
+async function loadCinema(){
+const root=raw+"cinema/2026-11-11/";
+const cases=[["ryan","Ryan · voce maschile"],["serena","Serena · voce femminile"]];
+let ok=0;
+for(const [id,title] of cases){
+try{
+ const response=await fetch(root+id+"/cinema-"+id+".json",{cache:"no-cache"});
+ if(!response.ok)throw Error("not ready");
+ const manifest=await response.json();
+ if(manifest.render!=="verified")throw Error("not verified");
+ const folder=root+id+"/";
+ document.getElementById("cinemaVideos").append(video("Cinematic Reel · "+title,folder+manifest.video,true));
+ document.getElementById("cinemaImages").append(pic("Copertina avatar · "+title,folder+manifest.cover,false),...manifest.carousel.map((path,i)=>pic("Cinema "+title+" · "+(i+1),folder+path,false)));
+ ok++;
+}catch(e){const p=document.createElement("p");p.style.color="#b9b0a4";p.textContent=title+": render da verificare sul cloud.";document.getElementById("cinemaVideos").append(p)}
+}
+document.getElementById("cinemaStatus").textContent=ok===2?"Due Reel cinematografici verificati":ok===1?"Un Reel pronto, un Reel in verifica":"Rendering cloud non ancora verificato";
+}
+loadCinema().catch(()=>{document.getElementById("cinemaStatus").textContent="Non ancora disponibile";});
 async function loadLatest(folder){const r=await fetch(repo+folder,{headers:{Accept:"application/vnd.github+json"}});if(!r.ok)throw Error("Nessun archivio cloud");const items=await r.json();const dirs=items.filter(x=>x.type==="dir").sort((a,b)=>b.name.localeCompare(a.name));if(!dirs.length)throw Error("Nessuna produzione");return folder+"/"+dirs[0].name}
 async function start(){let dir;try{dir=await loadLatest("generated")}catch{dir=await loadLatest("preview")}
 const endpoint=raw+dir+"/";const res=await fetch(endpoint+"manifest.json",{cache:"no-cache"});if(!res.ok)throw Error("Il manifest del render non è disponibile");
