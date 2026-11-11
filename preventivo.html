@@ -48,9 +48,19 @@
 <option value="Vetrina - da 390 euro">Sito vetrina — da 390 €</option>
 <option value="Fino a 5 pagine - da 790 euro">Sito multipagina — da 790 €</option>
 <option value="Restyling - da valutare">Restyling sito esistente</option>
+<option value="Manutenzione - richiesta di assistenza">Solo manutenzione o assistenza</option>
 <option value="Su misura - da valutare">Soluzione su misura</option>
 <option value="Non so - desidero un consiglio">Non so, vorrei un consiglio</option>
 </select></label>
+<label>Vuoi manutenzione o un intervento sul sito?
+<select name="Manutenzione" id="quote-maintenance">
+<option value="Da definire">Non so ancora / da definire</option>
+<option value="Nessuna manutenzione">No, solo il sito</option>
+<option value="Base - 29 euro al mese">Base — da 29 €/mese</option>
+<option value="Business mensile - 79 euro al mese">Business — 79 €/mese</option>
+<option value="Business intervento - 79 euro per intervento">Business — 79 € per intervento, senza abbonamento</option>
+</select></label>
+<p class="quote-maintenance-help">Scopri cosa è incluso nei <a href="./prezzi.html#abbonamento">piani di manutenzione Base e Business</a>. La selezione non attiva pagamenti né abbonamenti.</p>
 <label>Qual è il tuo obiettivo principale? *
 <select name="Obiettivo" required>
 <option value="">Seleziona l'obiettivo</option><option>Ricevere più contatti</option><option>Presentare servizi e prezzi</option><option>Mostrare un menu o un catalogo</option><option>Ottenere prenotazioni / appuntamenti</option><option>Migliorare il sito esistente</option><option>Altro</option></select></label>
@@ -113,6 +123,12 @@ if(service){
  const el=document.getElementById('quote-service');
  const options=[...el.options];
  const selected=options.find(o=>o.value===service || o.value.toLowerCase().includes(service.toLowerCase()));
+ if(selected)el.value=selected.value;
+}
+const maintenance=params.get('manutenzione');
+if(maintenance){
+ const el=document.getElementById('quote-maintenance');
+ const selected=[...el.options].find(o=>o.value.toLowerCase().includes(maintenance.toLowerCase()));
  if(selected)el.value=selected.value;
 }
 })();
