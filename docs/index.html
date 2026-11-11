@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luca · Sito Lume Cloud Studio</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--gold:#edc270;--fg:#f8f3e8;--muted:#a99e8c;--line:#453826}
+*{box-sizing:border-box}body{margin:0;color:var(--fg);background:radial-gradient(ellipse at 80% 0,#39251c,#08090b 52%);min-height:100vh}
+a{color:inherit;text-decoration:none}.wrap{max-width:1280px;margin:auto;padding:38px 20px 90px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.brand img{width:48px;height:48px;border-radius:10px}.brand strong{letter-spacing:.12em}.brand small{display:block;letter-spacing:.12em;font-size:10px;color:var(--muted)}
+.supra{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:52px}
+h1{font-size:clamp(33px,5.5vw,66px);line-height:1.04;letter-spacing:-.06em;margin:13px 0 20px}
+.lead{color:#b9b0a4;max-width:740px;line-height:1.75;font-size:15px}
+.status{display:inline-block;border:1px solid #645436;border-radius:30px;padding:9px 13px;color:var(--gold);font-size:12px}
+.section{margin-top:50px;display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap}
+h2{font-size:24px;margin:0;letter-spacing:-.035em}.sub{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:20px}
+.card{background:#151516;border:1px solid #3b332c;border-radius:18px;overflow:hidden;transition:transform .16s,border-color .16s}
+.card:hover{transform:translateY(-3px);border-color:#bc9857}
+.card img{width:100%;height:auto;display:block;aspect-ratio:4/5;object-fit:cover}
+.card.tall img{aspect-ratio:9/16}.card video{width:100%;aspect-ratio:9/16;background:#000}
+.card footer{padding:12px 14px 16px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.card footer b{font-size:13px}.card footer span{font-size:11px;color:var(--gold)}
+.info{padding:20px;background:#161413;border:1px solid var(--line);border-radius:14px;line-height:1.65;color:#bbb2a6;margin-top:30px}
+a.link{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+pre{white-space:pre-wrap;word-break:break-word;font:12px/1.6 ui-monospace,monospace;color:#c4b9ac;background:#0d0d0f;padding:20px;border-radius:12px;border:1px solid #38312d;max-width:800px}
+button{font:inherit;background:#edc270;color:#18120b;border:0;border-radius:10px;padding:12px 17px;font-weight:700;cursor:pointer}
+.foot{color:#8f877d;font-size:12px;margin-top:65px}
+</style>
+</head><body><main class="wrap">
+<header><a href="https://sitolume-studio.pages.dev/" class="brand"><img alt="Logo Sito Lume" src="https://raw.githubusercontent.com/activefloow-prog/sitolume-studio/main/assets/email/sitolume-signature.png"><span><strong>SITO LUME</strong><small>LUCA · CLOUD STUDIO</small></span></a><a class="status" href="https://github.com/activefloow-prog/sitolume-studio/actions">Produzione su GitHub Cloud</a></header>
+<div class="supra">Instagram · @sitolume_studio · Bozze originali</div>
+<h1>Un'identità<br>che si riconosce.</h1>
+<p class="lead">Post, caroselli, Stories e Reel progettati per raccontare Sito Lume. Tutto renderizzato nel cloud e pronto per la revisione: nessun render sul Mac, nessuna pubblicazione senza verifica.</p>
+<div class="section"><h2>Materiali social</h2><span class="sub" id="edition">Cerco l'ultima produzione verificata…</span></div>
+<div class="grid" id="visuals"></div>
+<div class="section"><h2>Reel e voci</h2><span class="sub">Ryan (maschile) · Serena (femminile) · Qwen3-TTS</span></div>
+<div class="grid" id="videos"></div>
+<div class="section"><h2>Caption e pubblicazione</h2></div>
+<div class="info">Le immagini sono in formato JPEG Instagram 1080×1350 o 1080×1920. I Reel usano MP4 con audio originale. L'integrazione Windsor.ai è collegata a <b>@sitolume_studio</b> ma <b>la pubblicazione è un'azione separata</b>; i DM Instagram non sono supportati da questo connettore.</div>
+<pre id="caption">Caricamento caption…</pre>
+<button id="copyCaption">Copia la caption</button>
+<p class="foot">Sito Lume · Materiali originali, nessun cliente inventato · Stato dei render verificato dal manifest cloud</p>
+</main>
+<script>
+(function(){
+"use strict";
+const repo="https://api.github.com/repos/activefloow-prog/sitolume-studio/contents/social/";
+const raw="https://raw.githubusercontent.com/activefloow-prog/sitolume-studio/main/social/";
+const pic=(label,url,tall)=>{const a=document.createElement("a");a.className="card"+(tall?" tall":"");a.href=url;a.target="_blank";a.rel="noopener noreferrer";const img=document.createElement("img");img.src=url;img.loading="lazy";img.alt=label;const footer=document.createElement("footer");const name=document.createElement("b");name.textContent=label;const span=document.createElement("span");span.textContent="Apri JPG";footer.append(name,span);a.append(img,footer);return a};
+const video=(label,url,available)=>{const div=document.createElement("div");div.className="card tall";if(available){const v=document.createElement("video");v.controls=true;v.preload="none";v.src=url;v.playsInline=true;div.append(v)}else{const p=document.createElement("p");p.style.padding="22px";p.textContent="Il Reel non è ancora stato generato o verificato.";div.append(p)}const footer=document.createElement("footer");const n=document.createElement("b");n.textContent=label;const st=document.createElement("span");st.textContent=available?"MP4 disponibile":"Da generare";footer.append(n,st);div.append(footer);return div};
+async function loadLatest(folder){const r=await fetch(repo+folder,{headers:{Accept:"application/vnd.github+json"}});if(!r.ok)throw Error("Nessun archivio cloud");const items=await r.json();const dirs=items.filter(x=>x.type==="dir").sort((a,b)=>b.name.localeCompare(a.name));if(!dirs.length)throw Error("Nessuna produzione");return folder+"/"+dirs[0].name}
+async function start(){let dir;try{dir=await loadLatest("generated")}catch{dir=await loadLatest("preview")}
+const endpoint=raw+dir+"/";const res=await fetch(endpoint+"manifest.json",{cache:"no-cache"});if(!res.ok)throw Error("Il manifest del render non è disponibile");
+const m=await res.json();document.getElementById("edition").textContent="Lotto "+dir.split("/").pop()+" · "+(m.production?.visuals||"anteprima tecnica");
+const grid=document.getElementById("visuals");grid.replaceChildren(pic("Post principale",endpoint+m.post,false),...m.carousel.map((name,i)=>pic("Carosello "+(i+1),endpoint+name,false)),pic("Story verticale",endpoint+m.story,true));
+const clips=document.getElementById("videos");clips.replaceChildren(video("Reel Ryan · voce maschile",endpoint+"reel-ryan.mp4",m.production?.ryan_reel==="verified"),video("Reel Serena · voce femminile",endpoint+"reel-serena.mp4",m.production?.serena_reel==="verified"));
+document.getElementById("caption").textContent=m.caption||"Caption da preparare";
+document.getElementById("copyCaption").onclick=()=>navigator.clipboard.writeText(m.caption||"").then(()=>{document.getElementById("copyCaption").textContent="Copiata"});
+}
+start().catch(e=>{document.getElementById("edition").textContent=e.message;document.getElementById("caption").textContent="I file rimangono su GitHub; consulta la sezione Actions del repository."});
+})();
+</script></body></html>
