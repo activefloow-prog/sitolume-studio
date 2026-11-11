@@ -26,7 +26,7 @@ def main():
         assert any(v.get("codec_type")=="audio" for v in probe["streams"])
         with tempfile.TemporaryDirectory(prefix="sitolume-avqa-") as tmp:
             frames=[]
-            for i,t in enumerate((.5,1.25,2.0,2.75,3.5)):
+            for i,t in enumerate((.25,.65,1.05,1.45,1.85)):
                 f=Path(tmp)/f"frame-{i:02d}.png"
                 run("ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(min(t,dur-.1)),"-i",str(vid),"-frames:v","1",str(f))
                 im=Image.open(f).convert("RGB")
