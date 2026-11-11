@@ -55,7 +55,8 @@ const raw="https://raw.githubusercontent.com/activefloow-prog/sitolume-studio/ma
 const pic=(label,url,tall)=>{const a=document.createElement("a");a.className="card"+(tall?" tall":"");a.href=url;a.target="_blank";a.rel="noopener noreferrer";const img=document.createElement("img");img.src=url;img.loading="lazy";img.alt=label;const footer=document.createElement("footer");const name=document.createElement("b");name.textContent=label;const span=document.createElement("span");span.textContent="Apri JPG";footer.append(name,span);a.append(img,footer);return a};
 const video=(label,url,available)=>{const div=document.createElement("div");div.className="card tall";if(available){const v=document.createElement("video");v.controls=true;v.preload="none";v.src=url;v.playsInline=true;div.append(v)}else{const p=document.createElement("p");p.style.padding="22px";p.textContent="Il Reel non è ancora stato generato o verificato.";div.append(p)}const footer=document.createElement("footer");const n=document.createElement("b");n.textContent=label;const st=document.createElement("span");st.textContent=available?"MP4 disponibile":"Da generare";footer.append(n,st);div.append(footer);return div};
 async function loadCinema(){
-const root=raw+"cinema/2026-11-11/";
+const newestCinema=await loadLatest("cinema");
+const root=raw+newestCinema+"/";
 const cases=[["ryan","Ryan · voce maschile"],["serena","Serena · voce femminile"]];
 let ok=0;
 for(const [id,title] of cases){
