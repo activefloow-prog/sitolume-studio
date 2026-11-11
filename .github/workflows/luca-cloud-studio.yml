@@ -40,7 +40,7 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check --quiet pillow==11.3.0 soundfile==0.13.1
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core sox
       - name: Render original Instagram content and QA
         id: visuals
         shell: bash
