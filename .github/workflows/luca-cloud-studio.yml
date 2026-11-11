@@ -123,6 +123,7 @@ jobs:
             echo "No changes; duplicate avoided"
           else
             git commit -m "Luca: original cloud Instagram assets and voice status"
+            git pull --rebase origin main
             git push
           fi
       - name: Keep temporary QA artifact on GitHub only
