@@ -44,7 +44,12 @@ def make(inp:Path, out:Path, number:int, voice:str):
     canvas.convert("RGB").save(out,"JPEG",quality=93,optimize=True,subsampling=0)
 
 def main():
-    root=Path("social/cinema/2026-11-11")
+    import argparse
+    from datetime import datetime, timezone
+    p=argparse.ArgumentParser()
+    p.add_argument("--day",default=datetime.now(timezone.utc).date().isoformat())
+    args=p.parse_args()
+    root=Path("social/cinema")/args.day
     for voice in ("ryan","serena"):
         folder=root/voice
         first=folder/f"scene-{voice}-01.jpg"
