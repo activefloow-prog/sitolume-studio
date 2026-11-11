@@ -83,7 +83,7 @@ jobs:
           VOICE="${{ inputs.voice }}"
           cd /tmp/luca-musetalk-poc/musetalk
           MUSETALK_CONFIG="configs/inference/sitolume_$VOICE.yaml" \
-          MUSETALK_OUTPUT="results/poc/v15/sitolume_$VOICE-$VOICE-short.mp4" \
+          MUSETALK_OUTPUT="results/poc/v15/sitolume_${VOICE}_${VOICE}-short.mp4" \
           bash run.sh
           test -s outputs/musetalk_demo.mp4
       - name: Validate REAL lip-synced video and original speech
