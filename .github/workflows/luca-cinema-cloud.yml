@@ -1,0 +1,103 @@
+name: Luca Cinematic Avatar Reels - Cloud
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: luca-cinematic-avatar-production
+  cancel-in-progress: false
+
+jobs:
+  render:
+    name: Cinematic original synthetic presenters Ryan and Serena
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - name: Checkout Sito Lume assets
+        uses: actions/checkout@v4
+      - name: Set up isolated cloud Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install only open-source CPU tools on GitHub runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet Pillow==11.3.0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+      - name: Verify source narration and portrait license
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="social/generated/2026-11-11"
+          test -s "$ROOT/ryan-it.wav"
+          test -s "$ROOT/serena-it.wav"
+          curl --fail --retry 2 --silent --show-error https://raw.githubusercontent.com/visualizevalue/headshots/main/LICENSE -o /tmp/sitolume-headshot-license.txt
+          grep -q "CC0 1.0 Universal" /tmp/sitolume-headshot-license.txt
+          echo "Existing Ryan & Serena audio + open synthetic avatar license verified."
+      - name: Render Ryan cinematic vertical video and carousel
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p social/cinema/2026-11-11/ryan
+          python social/luca_cinematic.py \
+            --voice ryan \
+            --audio social/generated/2026-11-11/ryan-it.wav \
+            --out social/cinema/2026-11-11/ryan
+      - name: Render Serena cinematic vertical video and carousel
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p social/cinema/2026-11-11/serena
+          python social/luca_cinematic.py \
+            --voice serena \
+            --audio social/generated/2026-11-11/serena-it.wav \
+            --out social/cinema/2026-11-11/serena
+      - name: Verify both reels before adding them to cloud gallery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json,subprocess
+          root=Path('social/cinema/2026-11-11')
+          for voice in ('ryan','serena'):
+              folder=root/voice
+              manifest=json.loads((folder/f'cinema-{voice}.json').read_text())
+              assert manifest['avatar'].startswith('synthetic')
+              assert manifest['instagram_posted'] is False
+              assert len(manifest['carousel'])==4
+              assert (folder/manifest['cover']).stat().st_size > 100000
+              video=folder/manifest['video']
+              assert video.stat().st_size > 150000
+              streams=json.loads(subprocess.check_output([
+                'ffprobe','-v','error','-show_entries',
+                'stream=codec_type,width,height:format=duration','-of','json',str(video)],text=True))
+              assert any(s.get('codec_type')=='video' and s.get('width')==1080 and s.get('height')==1920 for s in streams['streams'])
+              assert any(s.get('codec_type')=='audio' for s in streams['streams'])
+              print(voice,'CINEMATIC QA PASS',round(float(streams['format']['duration']),1),'seconds')
+          PY
+      - name: Upload two verified cinema reels and cover cards to public GitHub
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add social/cinema/2026-11-11
+          if git diff --cached --quiet; then
+            echo "Existing identical cinema assets, no duplicate"
+          else
+            git commit -m "Luca: premiere cinematic original virtual presenters Ryan & Serena"
+            git pull --rebase origin main
+            git push
+          fi
+      - name: Keep optional QA media in ephemeral GitHub artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: luca-cinematic-preview-${{ github.run_id }}
+          path: social/cinema/2026-11-11
+          retention-days: 3
