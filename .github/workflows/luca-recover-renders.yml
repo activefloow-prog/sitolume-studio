@@ -1,0 +1,63 @@
+name: Luca Recover Verified Cloud Renders
+on:
+  workflow_dispatch:
+    inputs:
+      original_run:
+        description: 'Verified Luca cloud render workflow run ID'
+        type: string
+        required: true
+        default: '42939154084'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: luca-recover-assets
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download only the verified render artifact from this repository
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.original_run }}
+          name: luca-cloud-studio-${{ inputs.original_run }}
+          path: social/generated/2026-11-11
+      - name: Verify media before public asset commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="social/generated/2026-11-11"
+          python - "$ROOT" <<'PY'
+          import sys,json,wave,os
+          from pathlib import Path
+          p=Path(sys.argv[1]);m=json.loads((p/'manifest.json').read_text())
+          for label in ('ryan','serena'):
+              assert m['production'][label+'_audio']=='verified',label
+              assert m['production'][label+'_reel']=='verified',label
+              with wave.open(str(p/(label+'-it.wav')),'rb') as f:
+                  duration=f.getnframes()/f.getframerate()
+                  assert 4<duration<80,(label,duration)
+              vid=p/('reel-'+label+'.mp4')
+              assert vid.is_file() and vid.stat().st_size>100000,vid
+              print(label,'voice and reel artifact passed',round(duration,2),'sec')
+          assert m['production']['instagram_posted'] is False
+          assert len(list(p.glob('carousel-*.jpg')))==5
+          PY
+      - name: Commit media to GitHub cloud, rebasing other team changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add social/generated/2026-11-11
+          if git diff --cached --quiet; then
+            echo "Files already uploaded"
+          else
+            git commit -m "Luca: deliver verified cloud Ryan and Serena Reels without rerender"
+            git pull --rebase origin main
+            git push
+          fi
