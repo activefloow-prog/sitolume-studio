@@ -32,6 +32,9 @@ button{font:inherit;background:#edc270;color:#18120b;border:0;border-radius:10px
 <div class="supra">Instagram · @sitolume_studio · Bozze originali</div>
 <h1>Un'identità<br>che si riconosce.</h1>
 <p class="lead">Post, caroselli, Stories e Reel progettati per raccontare Sito Lume. Tutto renderizzato nel cloud e pronto per la revisione: nessun render sul Mac, nessuna pubblicazione senza verifica.</p>
+<div class="section"><h2>Reel completi · Ryan e Serena</h2><span class="sub" id="fullSyncStatus">Render completo non ancora verificato</span></div>
+<p class="lead">I Reel completi compaiono solo dopo la generazione dell'intera voce e la verifica MP4 nel cloud. Nessuna pubblicazione automatica.</p>
+<div class="grid" id="fullSyncVideos"></div>
 <div class="section"><h2>Avatar che parlano · Test lipsync reale</h2><span class="sub" id="syncStatus">Verifica in corso sul cloud…</span></div>
 <p class="lead">Questa è la prova che conta: la bocca deve essere generata dall'audio Ryan o Serena. Un MP4 di prova non equivale ancora a un Reel finale con movimenti del corpo naturali.</p>
 <div class="grid" id="syncVideos"></div>
@@ -60,6 +63,29 @@ const repo="https://api.github.com/repos/activefloow-prog/sitolume-studio/conten
 const raw="https://raw.githubusercontent.com/activefloow-prog/sitolume-studio/main/social/";
 const pic=(label,url,tall)=>{const a=document.createElement("a");a.className="card"+(tall?" tall":"");a.href=url;a.target="_blank";a.rel="noopener noreferrer";const img=document.createElement("img");img.src=url;img.loading="lazy";img.alt=label;const footer=document.createElement("footer");const name=document.createElement("b");name.textContent=label;const span=document.createElement("span");span.textContent="Apri JPG";footer.append(name,span);a.append(img,footer);return a};
 const video=(label,url,available)=>{const div=document.createElement("div");div.className="card tall";if(available){const v=document.createElement("video");v.controls=true;v.preload="none";v.src=url;v.playsInline=true;div.append(v)}else{const p=document.createElement("p");p.style.padding="22px";p.textContent="Il Reel non è ancora stato generato o verificato.";div.append(p)}const footer=document.createElement("footer");const n=document.createElement("b");n.textContent=label;const st=document.createElement("span");st.textContent=available?"MP4 disponibile":"Da generare";footer.append(n,st);div.append(footer);return div};
+async function loadFullLipSync(){
+ const root=raw+"lipsync/full/2026-11-11/";
+ const cases=[["ryan","Ryan maschile"],["serena","Serena femminile"]];
+ let ok=0;
+ const container=document.getElementById("fullSyncVideos");
+ for(const [id,label] of cases){
+  try{
+    const response=await fetch(root+id+"/status.json",{cache:"no-store"});
+    if(!response.ok)throw Error("missing");
+    const status=await response.json();
+    if(status.verified!==true || status.lipsync_model!=="TMElyralab/MuseTalk v1.5")throw Error("not verified");
+    container.append(video("Reel completo · "+label,root+id+"/"+status.output,true));
+    ok++;
+  }catch(e){
+    const p=document.createElement("div");
+    p.className="card";
+    p.innerHTML="<p style='padding:22px'>"+label+": render completo non ancora verificato.</p>";
+    container.append(p);
+  }
+ }
+ document.getElementById("fullSyncStatus").textContent=ok===2?"Due Reel con audio completo verificati":ok===1?"Un Reel completo verificato":"Nessun Reel completo ancora validato";
+}
+loadFullLipSync().catch(()=>{document.getElementById("fullSyncStatus").textContent="Produzione completa da verificare";});
 async function loadLipSyncPilot(){
  const root=raw+"lipsync/2026-11-11/";
  const cases=[["ryan","Ryan · voce maschile"],["serena","Serena · voce femminile"]];
