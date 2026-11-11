@@ -1,0 +1,14 @@
+{
+  "voice": "serena",
+  "lipsync_model": "TMElyralab/MuseTalk v1.5",
+  "method": "real audio-conditioned lip generation",
+  "test_clip_seconds": 2.0,
+  "output": "reel-serena-musetalk-test.mp4",
+  "verified": true,
+  "requires_visual_owner_review": true,
+  "instagram_posted": false,
+  "cost_mode": "free public GitHub Actions CPU",
+  "review_sheet": "review-serena-frames.jpg",
+  "frame_variation_qa": "non_static_frames_detected",
+  "human_lip_sync_review": "pending"
+}
