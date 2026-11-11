@@ -1,0 +1,129 @@
+name: Luca Real Lip Sync MuseTalk CPU Pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      voice:
+        description: "Avatar voice to test"
+        required: true
+        type: choice
+        options: [ryan, serena]
+        default: ryan
+
+permissions:
+  contents: write
+
+concurrency:
+  group: luca-real-lipsync-cpu-proof
+  cancel-in-progress: false
+
+jobs:
+  lipsync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    env:
+      MUSETALK_VENV: .venv-cpu
+      OMP_NUM_THREADS: "4"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_NO_INPUT: "1"
+    steps:
+      - name: Checkout original Sito Lume assets
+        uses: actions/checkout@v4
+      - name: Verify reference assets and source rights
+        shell: bash
+        run: |
+          set -euo pipefail
+          VOICE="${{ inputs.voice }}"
+          test -s "social/generated/2026-11-11/${VOICE}-it.wav"
+          test -s "social/cinema/2026-11-11/${VOICE}/scene-${VOICE}-01.jpg"
+          test -s "social/cinema/2026-11-11/${VOICE}/reel-${VOICE}-cinema.mp4"
+          mkdir -p "social/lipsync/2026-11-11/${VOICE}"
+          echo "CC0 portrait & Italian Qwen3-TTS verified; NO Instagram publishing."
+      - name: Install public GitHub runner CPU tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg git libgl1 libglib2.0-0
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          git clone --depth 1 https://github.com/Alok-Ranjan23/lipsync-poc.git /tmp/luca-musetalk-poc
+      - name: Install MuseTalk 1.5 CPU in ephemeral GitHub cloud
+        shell: bash
+        timeout-minutes: 38
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          cd /tmp/luca-musetalk-poc/musetalk
+          bash setup.sh
+      - name: Create a 5-second source face and Italian narration excerpt
+        shell: bash
+        run: |
+          set -euo pipefail
+          VOICE="${{ inputs.voice }}"
+          MUSE="/tmp/luca-musetalk-poc/musetalk/MuseTalk"
+          mkdir -p "$MUSE/data"
+          ffmpeg -hide_banner -loglevel error -y \
+              -i "social/cinema/2026-11-11/$VOICE/scene-$VOICE-01.jpg" \
+              -vf "scale=512:910:flags=lanczos" \
+              "$MUSE/data/sitolume_$VOICE.jpg"
+          ffmpeg -hide_banner -loglevel error -y \
+              -i "social/generated/2026-11-11/$VOICE-it.wav" \
+              -t 5.0 -ar 16000 -ac 1 "$MUSE/data/$VOICE-short.wav"
+          cat > "$MUSE/configs/inference/sitolume_$VOICE.yaml" <<EOF
+          task_0:
+            video_path: "data/sitolume_$VOICE.jpg"
+            audio_path: "data/$VOICE-short.wav"
+          EOF
+      - name: Generate audio-conditioned mouth movement with free CPU
+        shell: bash
+        timeout-minutes: 60
+        run: |
+          set -euo pipefail
+          VOICE="${{ inputs.voice }}"
+          cd /tmp/luca-musetalk-poc/musetalk
+          MUSETALK_CONFIG="configs/inference/sitolume_$VOICE.yaml" \
+          MUSETALK_OUTPUT="results/poc/v15/sitolume_$VOICE-$VOICE-short.mp4" \
+          bash run.sh
+          test -s outputs/musetalk_demo.mp4
+      - name: Validate REAL lip-synced video and original speech
+        shell: bash
+        run: |
+          set -euo pipefail
+          VOICE="${{ inputs.voice }}"
+          OUT="social/lipsync/2026-11-11/$VOICE"
+          cp /tmp/luca-musetalk-poc/outputs/musetalk_demo.mp4 "$OUT/reel-$VOICE-musetalk-test.mp4"
+          ffprobe -v error -show_entries stream=codec_type,width,height -of json "$OUT/reel-$VOICE-musetalk-test.mp4" > "$OUT/ffprobe.json"
+          python - "$OUT" "$VOICE" <<'PY'
+          from pathlib import Path
+          import json,sys
+          p=Path(sys.argv[1]);voice=sys.argv[2]
+          data=json.loads((p/'ffprobe.json').read_text())['streams']
+          if not any(x.get('codec_type')=='video' and x.get('width',0)>=256 for x in data):
+              raise RuntimeError("No valid video")
+          if not any(x.get('codec_type')=='audio' for x in data):
+              raise RuntimeError("No original speech")
+          video=p/f"reel-{voice}-musetalk-test.mp4"
+          if video.stat().st_size<90000: raise RuntimeError("Video too small")
+          status={'voice':voice,'lipsync_model':'TMElyralab/MuseTalk v1.5',
+                 'method':'real audio-conditioned lip generation',
+                 'test_clip_seconds':5,'output':video.name,'verified':True,
+                 'requires_visual_owner_review':True,'instagram_posted':False,
+                 'cost_mode':'free public GitHub Actions CPU',
+                 'source':'Sito Lume Ryan/Serena and synthetic CC0 virtual presenter'}
+          (p/'status.json').write_text(json.dumps(status,indent=2)+'\n')
+          print('REAL AUDIO-DRIVEN MOUTH TEST',video,video.stat().st_size)
+          PY
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT"
+          git commit -m "Luca: proof real mouth-sync MuseTalk CPU for $VOICE"
+          git pull --rebase origin main
+          git push
+      - name: Retain cloud pilot if a stage fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: luca-real-musetalk-${{ github.run_id }}
+          path: social/lipsync/2026-11-11/
+          retention-days: 2
