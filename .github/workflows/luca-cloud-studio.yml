@@ -91,6 +91,23 @@ jobs:
               python social/luca_reel_cloud.py --assets "$ROOT" --voice "$ROOT/$v-it.wav" --out "$ROOT/reel-$v.mp4"
             fi
           done
+      - name: Render cinematographic virtual presenters in cloud
+        id: cinema
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="${{ steps.visuals.outputs.root }}"
+          DAY="$(date -u +%Y-%m-%d)"
+          for v in ryan serena; do
+            if [ -s "$ROOT/$v-it.wav" ]; then
+              mkdir -p "social/cinema/$DAY/$v"
+              python social/luca_cinematic.py --voice "$v" --audio "$ROOT/$v-it.wav" --out "social/cinema/$DAY/$v"
+            fi
+          done
+          if [ -s "social/cinema/$DAY/ryan/reel-ryan-cinema.mp4" ] || [ -s "social/cinema/$DAY/serena/reel-serena-cinema.mp4" ]; then
+            python social/luca_cinema_covers.py --day "$DAY"
+          fi
       - name: Record actual results, not invented success
         if: ${{ always() && steps.visuals.outcome == 'success' }}
         shell: bash
@@ -105,6 +122,8 @@ jobs:
               'serena_audio':'verified' if (p/'serena-it.wav').is_file() else 'not_generated',
               'ryan_reel':'verified' if (p/'reel-ryan.mp4').is_file() else 'not_generated',
               'serena_reel':'verified' if (p/'reel-serena.mp4').is_file() else 'not_generated',
+              'cinematic_ryan':'verified' if (pathlib.Path('social/cinema')/p.name/'ryan/reel-ryan-cinema.mp4').is_file() else 'not_generated',
+              'cinematic_serena':'verified' if (pathlib.Path('social/cinema')/p.name/'serena/reel-serena-cinema.mp4').is_file() else 'not_generated',
               'instagram_posted':False,'direct_messages_supported':False,
               'host':'public GitHub assets (not Instagram)'}
           (p/'manifest.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
@@ -118,7 +137,7 @@ jobs:
           ROOT="${{ steps.visuals.outputs.root }}"
           git config user.name "Sito Lume Cloud Studio"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$ROOT"
+          git add "$ROOT" "social/cinema/$(date -u +%Y-%m-%d)" 2>/dev/null || git add "$ROOT"
           if git diff --cached --quiet; then
             echo "No changes; duplicate avoided"
           else
