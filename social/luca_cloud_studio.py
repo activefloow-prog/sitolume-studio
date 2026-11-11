@@ -60,12 +60,13 @@ def background(w,h,seed):
 
 def brand(im,draw,w,h,scale):
     pad=round(82*scale)
+    top=round((300 if h>1500 else 82)*scale)
     official=Path(__file__).resolve().parent.parent/"assets"/"email"/"sitolume-signature.png"
     if not official.is_file(): raise FileNotFoundError("Official Sito Lume logo missing")
     logo=Image.open(official).convert("RGBA").resize((round(55*scale),round(55*scale)))
-    im.paste(logo,(pad,pad),logo)
-    draw.text((pad+73*scale,pad+8*scale),"SITO LUME",font=font(24*scale,True),fill=C["white"])
-    draw.text((pad+74*scale,pad+40*scale),"STUDIO DIGITALE",font=font(14*scale),fill=C["muted"])
+    im.paste(logo,(pad,top),logo)
+    draw.text((pad+73*scale,top+8*scale),"SITO LUME",font=font(24*scale,True),fill=C["white"])
+    draw.text((pad+74*scale,top+40*scale),"STUDIO DIGITALE",font=font(14*scale),fill=C["muted"])
 
 def slide(item,w,h,seed):
     scale=w/1080
