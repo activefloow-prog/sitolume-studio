@@ -30,6 +30,39 @@ VOICE_TEXT = (
  "Scopri il nostro lavoro dal link in bio."
 )
 
+SERIES = [
+    (CONTENT, CAPTION, VOICE_TEXT),
+    ([
+        {"number":"01","eyebrow":"PRIMA IMPRESSIONE","title":["IL TUO SITO","E CHIARO?"],"highlight":1,"body":"Un visitatore deve capire subito chi sei e perche contattarti.","pill":"INIZIA DALLA CHIAREZZA"},
+        {"number":"02","eyebrow":"MOBILE FIRST","title":["BELLO ANCHE","SUL TELEFONO"],"highlight":1,"body":"Testi leggibili e pulsanti facili da usare migliorano l'esperienza.","pill":"PENSA ALLO SMARTPHONE"},
+        {"number":"03","eyebrow":"PERCORSO CLIENTE","title":["CONTATTO FACILE","SENZA CACCIA"],"highlight":1,"body":"Rendi evidente il numero e il modulo per chiedere informazioni.","pill":"UN CLICK BEN POSIZIONATO"},
+        {"number":"04","eyebrow":"FIDUCIA DIGITALE","title":["SERVIZI E PREZZI","SENZA CONFUSIONE"],"highlight":1,"body":"Spiega cosa fai e come funziona la tua consulenza.","pill":"TRASPARENZA CONCRETA"},
+        {"number":"05","eyebrow":"SITO LUME","title":["LA TUA AZIENDA","MERITA CURA"],"highlight":1,"body":"Progettiamo siti chiari e moderni per attivita in tutta Italia.","pill":"VISITA IL NOSTRO SITO"}],
+     "Il sito della tua attivita e davvero semplice da usare da smartphone? Ecco quattro aspetti utili da controllare. Progettiamo esperienze chiare per imprese in tutta Italia. Scopri Sito Lume dal link in bio.\n\n#SitoLume #WebDesign #SitiWebProfessionali #ImpresaItalia",
+     "Un cliente visita il tuo sito dal telefono. Riesce a capire cosa offri, quali servizi proponi e come contattarti? Se la risposta non e chiara, e il momento di rivedere l'esperienza. Sito Lume, siti professionali per tutta Italia."),
+    ([
+        {"number":"01","eyebrow":"ESPERIENZA DIGITALE","title":["DA VISITATORE","A CONTATTO"],"highlight":1,"body":"Ogni pagina dovrebbe guidare le persone con semplicita.","pill":"SEGUI IL PERCORSO"},
+        {"number":"02","eyebrow":"IDENTITA","title":["MOSTRA CHI SEI","SENZA ECCESSI"],"highlight":1,"body":"Le tue foto originali e una presentazione sincera contano.","pill":"AUTENTICITA PRIMA DI TUTTO"},
+        {"number":"03","eyebrow":"SERVIZI","title":["POCHI MESSAGGI","MA CHIARI"],"highlight":1,"body":"Organizza i servizi per rispondere alle domande frequenti.","pill":"RIDUCI LE DISTRAZIONI"},
+        {"number":"04","eyebrow":"CONTATTO","title":["IL PROSSIMO PASSO","DEVE ESSERE SEMPLICE"],"highlight":1,"body":"Telefono, email e richiesta preventivo devono essere immediati.","pill":"CHIEDERE E FACILE"},
+        {"number":"05","eyebrow":"SITO LUME","title":["FAI BRILLARE","LA TUA IMPRESA"],"highlight":1,"body":"Un progetto web su misura parte dall'ascolto del tuo lavoro.","pill":"PARLIAMONE INSIEME"}],
+     "Un buon sito non costringe il visitatore a cercare informazioni: guida con chiarezza, foto autentiche e un contatto immediato. Se stai progettando una nuova presenza digitale, scopri Sito Lume.\n\n#SitoLume #WebDesignItalia #SitiWeb #PiccoleImprese",
+     "Da visitatore a contatto: ogni dettaglio del tuo sito ha un ruolo. Una presentazione autentica, servizi chiari e un modo semplice per chiedere informazioni. Sito Lume crea esperienze digitali curate per imprese in tutta Italia."),
+    ([
+        {"number":"01","eyebrow":"CHECKLIST SITO","title":["QUANDO SERVE","UN RESTYLING?"],"highlight":1,"body":"Non serve rifare tutto: prima individua i problemi veri.","pill":"FAI UN CONTROLLO"},
+        {"number":"02","eyebrow":"LEGGIBILITA","title":["TESTI TROPPO","PICCOLI?"],"highlight":1,"body":"Se devi ingrandire per leggere, migliora la versione mobile.","pill":"PRIORITA ALLA LETTURA"},
+        {"number":"03","eyebrow":"VELOCITA","title":["UN SITO LENTO","STANCA"],"highlight":1,"body":"Immagini ottimizzate e pagine leggere fanno la differenza.","pill":"PROVA SU MOBILE"},
+        {"number":"04","eyebrow":"IDENTITA","title":["IL TUO BRAND","SI RICONOSCE?"],"highlight":1,"body":"Colori e tono coerenti aiutano la riconoscibilita.","pill":"COERENZA VISIVA"},
+        {"number":"05","eyebrow":"SITO LUME","title":["UN PROGETTO WEB","PENSATO PER TE"],"highlight":1,"body":"Valutiamo soluzioni reali, senza promettere risultati impossibili.","pill":"SCOPRI I NOSTRI MODELLI"}],
+     "Hai un sito che non ti convince piu? Prima di cambiare tutto, controlla testi, velocita, versioni mobile e coerenza visiva. Per una valutazione concreta, Sito Lume e online.\n\n#SitoLume #RestylingSito #WebDesigner #SitiWebItalia",
+     "Il tuo sito ha bisogno di un restyling? Parti dalle cose concrete: leggibilita, velocita, identita e contatti chiari. Non sempre bisogna rifare tutto. In Sito Lume cerchiamo soluzioni pensate per la tua attivita.")
+]
+
+def chosen_series():
+    import datetime
+    idx=(datetime.datetime.now(datetime.timezone.utc).isocalendar().week-46)%len(SERIES)
+    return SERIES[idx]
+
 def font(size, bold=False):
     return ImageFont.truetype(BOLD if bold else FONT, int(size))
 
@@ -119,13 +152,14 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument("--out",required=True);a=p.parse_args()
     root=Path(a.out);root.mkdir(parents=True,exist_ok=True)
-    for i,item in enumerate(CONTENT):
+    cards,caption,spoken=chosen_series()
+    for i,item in enumerate(cards):
         im=slide(item,1080,1350,i+41)
         im.save(root/f"carousel-{i+1:02d}.jpg","JPEG",quality=94,optimize=True,subsampling=0)
-    slide(CONTENT[0],1080,1350,101).save(root/"post-01.jpg","JPEG",quality=94,optimize=True,subsampling=0)
+    slide(cards[0],1080,1350,101).save(root/"post-01.jpg","JPEG",quality=94,optimize=True,subsampling=0)
     story().save(root/"story-01.jpg","JPEG",quality=94,optimize=True,subsampling=0)
     # Vertical motion frames are assets for cloud Reel video build, not a published Reel.
-    for i,item in enumerate([CONTENT[0],CONTENT[1],CONTENT[3],CONTENT[4]]):
+    for i,item in enumerate([cards[0],cards[1],cards[3],cards[4]]):
         v=slide(item,1080,1920,i+71)
         v.save(root/f"reel-frame-{i+1:02d}.jpg","JPEG",quality=94,optimize=True,subsampling=0)
     manifest={"account":"sitolume_studio","format":"cloud-first","approved_for_publishing":False,
@@ -133,7 +167,7 @@ def main():
               "carousel":[f"carousel-{i:02d}.jpg" for i in range(1,6)],
               "reel_frames":[f"reel-frame-{i:02d}.jpg" for i in range(1,5)],
               "voices":{"male":"Ryan","female":"Serena","model":"Qwen3-TTS"},
-              "caption":CAPTION,"tts_script":VOICE_TEXT,
+              "caption":caption,"tts_script":spoken,
               "status":"visual-assets-only-until-voice-and-review"}
     (root/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n")
     print("Luca Cloud Studio: 6 feed JPG, 1 story JPG, 4 motion frames + manifest")
