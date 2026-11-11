@@ -81,6 +81,9 @@ jobs:
         run: |
           set -euo pipefail
           VOICE="${{ inputs.voice }}"
+          # The upstream POC run.sh copies its successful render to ../../outputs;
+          # create that destination before CPU inference to avoid losing a finished video.
+          mkdir -p /tmp/luca-musetalk-poc/outputs
           cd /tmp/luca-musetalk-poc/musetalk
           MUSETALK_CONFIG="/tmp/luca-musetalk-poc/musetalk/MuseTalk/configs/inference/sitolume_$VOICE.yaml" \
           MUSETALK_OUTPUT="results/poc/v15/sitolume_${VOICE}_${VOICE}-short.mp4" \
