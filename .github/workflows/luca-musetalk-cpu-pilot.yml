@@ -69,7 +69,7 @@ jobs:
               "$MUSE/data/sitolume_$VOICE.jpg"
           ffmpeg -hide_banner -loglevel error -y \
               -i "social/generated/2026-11-11/$VOICE-it.wav" \
-              -t 5.0 -ar 16000 -ac 1 "$MUSE/data/$VOICE-short.wav"
+              -t 2.0 -ar 16000 -ac 1 "$MUSE/data/$VOICE-short.wav"
           cat > "$MUSE/configs/inference/sitolume_$VOICE.yaml" <<EOF
           task_0:
             video_path: "data/sitolume_$VOICE.jpg"
@@ -111,7 +111,7 @@ jobs:
           if video.stat().st_size<90000: raise RuntimeError("Video too small")
           status={'voice':voice,'lipsync_model':'TMElyralab/MuseTalk v1.5',
                  'method':'real audio-conditioned lip generation',
-                 'test_clip_seconds':5,'output':video.name,'verified':True,
+                 'test_clip_seconds':2,'output':video.name,'verified':True,
                  'requires_visual_owner_review':True,'instagram_posted':False,
                  'cost_mode':'free public GitHub Actions CPU',
                  'source':'Sito Lume Ryan/Serena and synthetic CC0 virtual presenter'}
