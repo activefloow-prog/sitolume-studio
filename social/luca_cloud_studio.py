@@ -7,8 +7,8 @@ import argparse, json, math, random
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-C = {"bg": (10,20,17), "panel": (23,39,32), "lime": (213,255,102),
-     "white": (246,249,244), "muted": (171,189,176), "gold": (180,151,99)}
+C = {"bg": (9,9,12), "panel": (20,20,24), "lime": (237,194,112),
+     "white": (247,244,235), "muted": (194,183,170), "gold": (214,165,87)}
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 CONTENT = [
@@ -43,35 +43,37 @@ def background(w,h,seed):
     bg=Image.new("RGB",(w,h),C["bg"])
     glows=Image.new("RGBA",(w,h),(0,0,0,0))
     d=ImageDraw.Draw(glows)
-    for x,y,r,col in [(w*.89,h*.10,w*.68,(75,135,81,115)),
-                       (-w*.20,h*.72,w*.64,(50,92,69,90)),
-                       (w*.65,h*.86,w*.51,(47,72,49,60))]:
+    for x,y,r,col in [(w*.89,h*.10,w*.68,(123,82,38,105)),
+                       (-w*.20,h*.72,w*.64,(77,52,33,80)),
+                       (w*.65,h*.86,w*.51,(74,59,40,65))]:
         d.ellipse((int(x-r),int(y-r),int(x+r),int(y+r)),fill=col)
     bg=Image.alpha_composite(bg.convert("RGBA"),glows.filter(ImageFilter.GaussianBlur(125))).convert("RGB")
     b=ImageDraw.Draw(bg)
     for j in range(0,w,61):
-        b.line((j,0,j,h),fill=(17,30,23),width=1)
+        b.line((j,0,j,h),fill=(24,22,22),width=1)
     for j in range(0,h,61):
         b.line((0,j,w,j),fill=(17,30,23),width=1)
     for _ in range(55):
         x=rng.randrange(75,w-75);y=rng.randrange(100,h-100)
-        b.ellipse((x,y,x+1,y+1),fill=(62,86,67))
+        b.ellipse((x,y,x+1,y+1),fill=(74,62,49))
     return bg
 
-def brand(draw,w,h,scale):
+def brand(im,draw,w,h,scale):
     pad=round(82*scale)
-    draw.rounded_rectangle((pad,pad,pad+52*scale,pad+52*scale),radius=12*scale,fill=C["lime"])
-    draw.text((pad+15*scale,pad+10*scale),"S",font=font(29*scale,True),fill=C["bg"])
-    draw.text((pad+67*scale,pad+8*scale),"SITO LUME",font=font(24*scale,True),fill=C["white"])
-    draw.text((pad+68*scale,pad+40*scale),"STUDIO DIGITALE",font=font(14*scale),fill=C["muted"])
+    official=Path(__file__).resolve().parent.parent/"assets"/"email"/"sitolume-signature.png"
+    if not official.is_file(): raise FileNotFoundError("Official Sito Lume logo missing")
+    logo=Image.open(official).convert("RGBA").resize((round(55*scale),round(55*scale)))
+    im.paste(logo,(pad,pad),logo)
+    draw.text((pad+73*scale,pad+8*scale),"SITO LUME",font=font(24*scale,True),fill=C["white"])
+    draw.text((pad+74*scale,pad+40*scale),"STUDIO DIGITALE",font=font(14*scale),fill=C["muted"])
 
 def slide(item,w,h,seed):
     scale=w/1080
     im=background(w,h,seed)
     d=ImageDraw.Draw(im)
-    brand(d,w,h,scale)
+    brand(im,d,w,h,scale)
     pad=round(86*scale);mid=int(h*.53)
-    d.rounded_rectangle((pad,int(h*.22),w-pad,int(h*.79)),radius=28*scale,fill=C["panel"],outline=(51,70,55),width=2)
+    d.rounded_rectangle((pad,int(h*.22),w-pad,int(h*.79)),radius=28*scale,fill=C["panel"],outline=(85,65,45),width=2)
     d.rounded_rectangle((pad+36*scale,int(h*.29),pad+172*scale,int(h*.29)+6*scale),radius=3*scale,fill=C["lime"])
     d.text((pad+36*scale,int(h*.315)),item["eyebrow"],font=font(21*scale,True),fill=C["lime"])
     y=int(h*.394)
@@ -92,7 +94,7 @@ def slide(item,w,h,seed):
         d.text((pad+37*scale,int(h*.605)+43*scale*i),line,font=font(29*scale),fill=C["muted"])
     pill=item["pill"].upper()
     by=int(h*.73)
-    d.rounded_rectangle((pad+35*scale,by,w-pad-35*scale,by+58*scale),radius=16*scale,outline=(125,165,88),width=2)
+    d.rounded_rectangle((pad+35*scale,by,w-pad-35*scale,by+58*scale),radius=16*scale,outline=(166,119,67),width=2)
     pf=fit(d,pill,w-2*pad-114*scale,start=22*scale)
     d.text((pad+57*scale,by+17*scale),pill,font=pf,fill=C["lime"])
     d.text((pad,int(h*.905)),item["number"]+" / 05",font=font(24*scale,True),fill=C["lime"])
@@ -101,7 +103,7 @@ def slide(item,w,h,seed):
 
 def story(w=1080,h=1920):
     im=background(w,h,88);d=ImageDraw.Draw(im)
-    brand(d,w,h,1)
+    brand(im,d,w,h,1)
     d.rounded_rectangle((80,490,w-80,1500),radius=35,fill=C["panel"],outline=(51,73,56),width=3)
     d.text((123,620),"UN SITO",font=font(108,True),fill=C["white"])
     d.text((123,790),"CHE PARLA",font=font(100,True),fill=C["lime"])
