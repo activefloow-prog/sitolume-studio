@@ -88,7 +88,8 @@ jobs:
           MUSETALK_CONFIG="/tmp/luca-musetalk-poc/musetalk/MuseTalk/configs/inference/sitolume_$VOICE.yaml" \
           MUSETALK_OUTPUT="results/poc/v15/sitolume_${VOICE}_${VOICE}-short.mp4" \
           bash run.sh
-          test -s outputs/musetalk_demo.mp4
+          # Upstream run.sh copies to the grandparent directory, not its script folder.
+          test -s /tmp/luca-musetalk-poc/outputs/musetalk_demo.mp4
       - name: Validate REAL lip-synced video and original speech
         shell: bash
         run: |
