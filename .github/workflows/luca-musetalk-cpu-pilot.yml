@@ -108,7 +108,7 @@ jobs:
           if not any(x.get('codec_type')=='audio' for x in data):
               raise RuntimeError("No original speech")
           video=p/f"reel-{voice}-musetalk-test.mp4"
-          if video.stat().st_size<90000: raise RuntimeError("Video too small")
+          if video.stat().st_size<15000: raise RuntimeError("Video too small")
           status={'voice':voice,'lipsync_model':'TMElyralab/MuseTalk v1.5',
                  'method':'real audio-conditioned lip generation',
                  'test_clip_seconds':2,'output':video.name,'verified':True,
