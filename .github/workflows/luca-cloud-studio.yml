@@ -66,13 +66,13 @@ jobs:
       - name: Install cloud Qwen3-TTS (not on Mac)
         id: prep
         continue-on-error: true
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.voice != 'skip' }
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.voice != 'skip' }}
         run: |
           python -m pip install --disable-pip-version-check qwen-tts
       - name: Generate Ryan and Serena Italian voiceovers
         id: tts
         continue-on-error: true
-        if: ${{ steps.prep.outcome == 'success' }
+        if: ${{ steps.prep.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -92,7 +92,7 @@ jobs:
             fi
           done
       - name: Record actual results, not invented success
-        if: ${{ always() && steps.visuals.outcome == 'success' }
+        if: ${{ always() && steps.visuals.outcome == 'success' }}
         shell: bash
         run: |
           export ROOT="${{ steps.visuals.outputs.root }}"
@@ -111,7 +111,7 @@ jobs:
           print(json.dumps(m['production']))
           PY
       - name: Commit generated media to existing public repo
-        if: ${{ always() && steps.visuals.outcome == 'success' }
+        if: ${{ always() && steps.visuals.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -126,7 +126,7 @@ jobs:
             git push
           fi
       - name: Keep temporary QA artifact on GitHub only
-        if: ${{ always() && steps.visuals.outcome == 'success' }
+        if: ${{ always() && steps.visuals.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: luca-cloud-studio-${{ github.run_id }}
