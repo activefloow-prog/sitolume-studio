@@ -1,0 +1,134 @@
+name: Luca Sito Lume Cloud Studio
+
+on:
+  workflow_dispatch:
+    inputs:
+      voice:
+        description: "Cloud voices: Ryan, Serena, both, or visuals only"
+        required: true
+        type: choice
+        options: [both, Ryan, Serena, skip]
+        default: both
+  schedule:
+    - cron: "20 6 * * 1,4"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: luca-cloud-studio-assets
+  cancel-in-progress: false
+
+jobs:
+  create:
+    name: Render social visuals, Ryan/Serena voice, Reels in cloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_HUB_DISABLE_XET: "1"
+      OMP_NUM_THREADS: "4"
+      TOKENIZERS_PARALLELISM: "false"
+    steps:
+      - name: Checkout existing Sito Lume repository
+        uses: actions/checkout@v4
+      - name: Setup cloud Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install cloud visual and audio tools
+        run: |
+          python -m pip install --disable-pip-version-check --quiet pillow==11.3.0 soundfile==0.13.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+      - name: Render original Instagram content and QA
+        id: visuals
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="social/generated/$(date -u +%Y-%m-%d)"
+          echo "root=$ROOT" >> "$GITHUB_OUTPUT"
+          python social/luca_cloud_studio.py --out "$ROOT"
+          python - "$ROOT" <<'PY'
+          import json,sys
+          from pathlib import Path
+          from PIL import Image
+          p=Path(sys.argv[1])
+          m=json.loads((p/'manifest.json').read_text())
+          for n in [m['story'],m['post'],*m['carousel'],*m['reel_frames']]:
+              with Image.open(p/n) as im:
+                  assert im.format=='JPEG',n
+                  expected=(1080,1920) if 'story' in n or 'reel-frame' in n else (1080,1350)
+                  assert im.size==expected,(n,im.size)
+              assert (p/n).stat().st_size < 8*1024*1024,n
+          print("Visual QA passed: 1080px JPEGs, ratios and file sizes")
+          PY
+      - name: Install cloud Qwen3-TTS (not on Mac)
+        id: prep
+        continue-on-error: true
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.voice != 'skip' }
+        run: |
+          python -m pip install --disable-pip-version-check qwen-tts
+      - name: Generate Ryan and Serena Italian voiceovers
+        id: tts
+        continue-on-error: true
+        if: ${{ steps.prep.outcome == 'success' }
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="${{ steps.visuals.outputs.root }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then VOICE="${{ inputs.voice }}"; else VOICE="both"; fi
+          python social/luca_voice_cloud.py --manifest "$ROOT/manifest.json" --out "$ROOT" --voice "$VOICE"
+      - name: Compose 1080p Reels with actual narration
+        id: reels
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="${{ steps.visuals.outputs.root }}"
+          for v in ryan serena; do
+            if [ -s "$ROOT/$v-it.wav" ]; then
+              python social/luca_reel_cloud.py --assets "$ROOT" --voice "$ROOT/$v-it.wav" --out "$ROOT/reel-$v.mp4"
+            fi
+          done
+      - name: Record actual results, not invented success
+        if: ${{ always() && steps.visuals.outcome == 'success' }
+        shell: bash
+        run: |
+          export ROOT="${{ steps.visuals.outputs.root }}"
+          python - <<'PY'
+          import os,json,pathlib
+          p=pathlib.Path(os.environ['ROOT'])
+          m=json.loads((p/'manifest.json').read_text())
+          m['production']={'visuals':'verified',
+              'ryan_audio':'verified' if (p/'ryan-it.wav').is_file() else 'not_generated',
+              'serena_audio':'verified' if (p/'serena-it.wav').is_file() else 'not_generated',
+              'ryan_reel':'verified' if (p/'reel-ryan.mp4').is_file() else 'not_generated',
+              'serena_reel':'verified' if (p/'reel-serena.mp4').is_file() else 'not_generated',
+              'instagram_posted':False,'direct_messages_supported':False,
+              'host':'public GitHub assets (not Instagram)'}
+          (p/'manifest.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(m['production']))
+          PY
+      - name: Commit generated media to existing public repo
+        if: ${{ always() && steps.visuals.outcome == 'success' }
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="${{ steps.visuals.outputs.root }}"
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ROOT"
+          if git diff --cached --quiet; then
+            echo "No changes; duplicate avoided"
+          else
+            git commit -m "Luca: original cloud Instagram assets and voice status"
+            git push
+          fi
+      - name: Keep temporary QA artifact on GitHub only
+        if: ${{ always() && steps.visuals.outcome == 'success' }
+        uses: actions/upload-artifact@v4
+        with:
+          name: luca-cloud-studio-${{ github.run_id }}
+          path: ${{ steps.visuals.outputs.root }}
+          retention-days: 3
