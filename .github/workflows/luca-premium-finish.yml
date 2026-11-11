@@ -1,0 +1,69 @@
+name: Luca Premium Brand Finishing
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: luca-gold-brand-final
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install image/video tools on disposable cloud runner only
+        run: |
+          python -m pip install --quiet Pillow==11.3.0 soundfile==0.13.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+      - name: Rebuild premium black-gold brand art with official Sito Lume logo
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="social/generated/2026-11-11"
+          test -s "$ROOT/ryan-it.wav"
+          test -s "$ROOT/serena-it.wav"
+          python social/luca_cloud_studio.py --out "$ROOT"
+          python social/luca_reel_cloud.py --assets "$ROOT" --voice "$ROOT/ryan-it.wav" --out "$ROOT/reel-ryan.mp4"
+          python social/luca_reel_cloud.py --assets "$ROOT" --voice "$ROOT/serena-it.wav" --out "$ROOT/reel-serena.mp4"
+          python - "$ROOT" <<'PY'
+          import json,sys
+          from pathlib import Path
+          from PIL import Image
+          p=Path(sys.argv[1])
+          m=json.loads((p/'manifest.json').read_text())
+          for name in [m['post'],m['story'],*m['carousel'],*m['reel_frames']]:
+              with Image.open(p/name) as im:
+                  assert im.size in [(1080,1350),(1080,1920)]
+                  assert im.format=='JPEG'
+              assert (p/name).stat().st_size<8000000
+          for voice in ['ryan','serena']:
+              assert (p/(voice+'-it.wav')).stat().st_size>30000
+              assert (p/('reel-'+voice+'.mp4')).stat().st_size>100000
+          m['production']={
+              'visuals':'verified','ryan_audio':'verified','serena_audio':'verified',
+              'ryan_reel':'verified','serena_reel':'verified',
+              'instagram_posted':False,'direct_messages_supported':False,
+              'host':'GitHub Cloud premium Sito Lume official logo',
+              'brand':'gold-black official'}
+          (p/'manifest.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(m['production'],ensure_ascii=False))
+          PY
+      - name: Synchronize new premium media, preserve concurrent repo changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add social/generated/2026-11-11
+          if git diff --cached --quiet; then
+            echo "Already premium, no duplicate"
+          else
+            git commit -m "Luca: finish premium official gold-black Instagram Reels and carousel"
+            git pull --rebase origin main
+            git push
+          fi
