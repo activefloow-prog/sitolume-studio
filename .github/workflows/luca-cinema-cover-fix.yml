@@ -1,0 +1,49 @@
+name: Luca Cinema Cover Safezone Fix
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  covers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pure visual libraries on GitHub ephemeral runner
+        run: |
+          python -m pip install --quiet Pillow==11.3.0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-dejavu-core
+      - name: Redesign 4:5 avatar cover and carousel without cropping titles
+        run: |
+          python social/luca_cinema_covers.py
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          for v in ('ryan','serena'):
+              p=Path(f'social/cinema/2026-11-11/{v}')
+              for name in [f'cover-{v}.jpg']+[f'cinema-carousel-{v}-{i+1:02d}.jpg' for i in range(4)]:
+                  f=p/name
+                  with Image.open(f) as im:
+                      assert im.size==(1080,1350)
+                  assert f.stat().st_size>60000
+              assert (p/f'reel-{v}-cinema.mp4').stat().st_size>150000
+          print('Two original cinematic Reel videos untouched; 10 editorial covers verified')
+          PY
+      - name: Save only finished visuals to existing Sito Lume repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'social/cinema/2026-11-11/'
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Luca: final safe-framed cinematic carousel and avatar covers"
+            git pull --rebase origin main
+            git push
+          fi
