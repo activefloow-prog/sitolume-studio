@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: luca-real-lipsync-cpu-proof
+  group: luca-real-lipsync-cpu-proof-${{ inputs.voice }}
   cancel-in-progress: false
 
 jobs:
