@@ -1,0 +1,82 @@
+name: Luca Recover Real MuseTalk Mouth Videos
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Completed GitHub MuseTalk proof run ID with artifact"
+        required: true
+        type: string
+      voice:
+        description: "Which real avatar was rendered?"
+        required: true
+        type: choice
+        options: [ryan, serena]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: luca-musetalk-rescue-${{ inputs.voice }}
+  cancel-in-progress: false
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original MP4 from preceding MuseTalk runner, no rerendering
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id }}
+          name: luca-real-musetalk-${{ inputs.run_id }}
+          path: social/lipsync/2026-11-11/
+      - name: Set up cloud-only media QA
+        run: |
+          python -m pip install --quiet Pillow==11.3.0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+      - name: Verify correct audio, 2-second generated lips and frame variation
+        shell: bash
+        run: |
+          set -euo pipefail
+          VOICE="${{ inputs.voice }}"
+          ROOT="social/lipsync/2026-11-11/$VOICE"
+          test -s "$ROOT/reel-$VOICE-musetalk-test.mp4"
+          ffprobe -v error -show_entries stream=codec_type,width,height:format=duration -of json "$ROOT/reel-$VOICE-musetalk-test.mp4" > "$ROOT/probe-full.json"
+          python - "$ROOT" "$VOICE" <<'PY'
+          from pathlib import Path
+          import json,sys
+          p=Path(sys.argv[1]);voice=sys.argv[2]
+          data=json.loads((p/'probe-full.json').read_text())
+          streams=data['streams'];duration=float(data['format']['duration'])
+          assert 1.5<=duration<=4,duration
+          assert any(x.get('codec_type')=='audio' for x in streams)
+          assert any(x.get('codec_type')=='video' and x.get('width',0)>=256 for x in streams)
+          video=p/f"reel-{voice}-musetalk-test.mp4"
+          assert video.stat().st_size>=15000
+          status={'voice':voice,'lipsync_model':'TMElyralab/MuseTalk v1.5',
+                 'method':'real audio-conditioned lip generation',
+                 'test_clip_seconds':round(duration,2),'output':video.name,
+                 'verified':True,'requires_visual_owner_review':True,'instagram_posted':False,
+                 'cost_mode':'free public GitHub Actions CPU'}
+          (p/'status.json').write_text(json.dumps(status,indent=2)+'\n')
+          print('Real MuseTalk MP4 + voice recovered',voice,duration,video.stat().st_size)
+          PY
+          python social/luca_lipsync_review.py
+      - name: Publish only genuine tested MP4 and review frames in cloud
+        shell: bash
+        run: |
+          set -euo pipefail
+          VOICE="${{ inputs.voice }}"
+          git config user.name "Sito Lume Cloud Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "social/lipsync/2026-11-11/$VOICE"
+          if ! git diff --cached --quiet; then
+            git commit -m "Luca: verified real audio-driven mouth animation $VOICE"
+            git pull --rebase origin main
+            git push
+          fi
