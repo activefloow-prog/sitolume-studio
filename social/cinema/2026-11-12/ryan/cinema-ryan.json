@@ -1,0 +1,17 @@
+{
+  "voice": "ryan",
+  "avatar": "synthetic virtual presenter, portrait animation (not lipsync)",
+  "video": "reel-ryan-cinema.mp4",
+  "cover": "cover-ryan.jpg",
+  "carousel": [
+    "cinema-carousel-ryan-01.jpg",
+    "cinema-carousel-ryan-02.jpg",
+    "cinema-carousel-ryan-03.jpg",
+    "cinema-carousel-ryan-04.jpg"
+  ],
+  "resolution": "1080x1920",
+  "duration_seconds": 18.9,
+  "render": "verified",
+  "instagram_posted": false,
+  "credit": "Synthetic personas: visualizevalue/headshots, CC0 1.0. Audio: Sito Lume original Qwen3-TTS."
+}

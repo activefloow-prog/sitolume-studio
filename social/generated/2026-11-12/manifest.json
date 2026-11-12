@@ -1,0 +1,40 @@
+{
+  "account": "sitolume_studio",
+  "format": "cloud-first",
+  "approved_for_publishing": false,
+  "story": "story-01.jpg",
+  "post": "post-01.jpg",
+  "carousel": [
+    "carousel-01.jpg",
+    "carousel-02.jpg",
+    "carousel-03.jpg",
+    "carousel-04.jpg",
+    "carousel-05.jpg"
+  ],
+  "reel_frames": [
+    "reel-frame-01.jpg",
+    "reel-frame-02.jpg",
+    "reel-frame-03.jpg",
+    "reel-frame-04.jpg"
+  ],
+  "voices": {
+    "male": "Ryan",
+    "female": "Serena",
+    "model": "Qwen3-TTS"
+  },
+  "caption": "Hai un'attivita e vuoi capire se il tuo sito comunica davvero il tuo valore?\n\nEcco 3 errori comuni: messaggio poco chiaro, contatto complicato e mancanza di fiducia visiva.\n\nIn Sito Lume progettiamo siti professionali pensati per essere chiari, accessibili e coerenti con la tua attivita. La prima valutazione parte da una conversazione concreta.\n\nScopri di piu dal link in bio.\n\n#SitoLume #SitiWeb #WebDesignItalia #PiccoleImprese #PresenzaOnline",
+  "tts_script": "Un sito web bello non basta. Deve farti capire al primo sguardo. Se i servizi sono confusi, i contatti nascosti e il design poco curato, le persone possono andarsene. Sito Lume: siti web professionali per attivita in tutta Italia. Scopri il nostro lavoro dal link in bio.",
+  "status": "visual-assets-only-until-voice-and-review",
+  "production": {
+    "visuals": "verified",
+    "ryan_audio": "verified",
+    "serena_audio": "verified",
+    "ryan_reel": "verified",
+    "serena_reel": "verified",
+    "cinematic_ryan": "verified",
+    "cinematic_serena": "verified",
+    "instagram_posted": false,
+    "direct_messages_supported": false,
+    "host": "public GitHub assets (not Instagram)"
+  }
+}

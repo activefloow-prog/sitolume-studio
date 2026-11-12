@@ -1,0 +1,17 @@
+{
+  "voice": "serena",
+  "avatar": "synthetic virtual presenter, portrait animation (not lipsync)",
+  "video": "reel-serena-cinema.mp4",
+  "cover": "cover-serena.jpg",
+  "carousel": [
+    "cinema-carousel-serena-01.jpg",
+    "cinema-carousel-serena-02.jpg",
+    "cinema-carousel-serena-03.jpg",
+    "cinema-carousel-serena-04.jpg"
+  ],
+  "resolution": "1080x1920",
+  "duration_seconds": 17.4,
+  "render": "verified",
+  "instagram_posted": false,
+  "credit": "Synthetic personas: visualizevalue/headshots, CC0 1.0. Audio: Sito Lume original Qwen3-TTS."
+}
