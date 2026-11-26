@@ -1,0 +1,40 @@
+{
+  "account": "sitolume_studio",
+  "format": "cloud-first",
+  "approved_for_publishing": false,
+  "story": "story-01.jpg",
+  "post": "post-01.jpg",
+  "carousel": [
+    "carousel-01.jpg",
+    "carousel-02.jpg",
+    "carousel-03.jpg",
+    "carousel-04.jpg",
+    "carousel-05.jpg"
+  ],
+  "reel_frames": [
+    "reel-frame-01.jpg",
+    "reel-frame-02.jpg",
+    "reel-frame-03.jpg",
+    "reel-frame-04.jpg"
+  ],
+  "voices": {
+    "male": "Ryan",
+    "female": "Serena",
+    "model": "Qwen3-TTS"
+  },
+  "caption": "Un buon sito non costringe il visitatore a cercare informazioni: guida con chiarezza, foto autentiche e un contatto immediato. Se stai progettando una nuova presenza digitale, scopri Sito Lume.\n\n#SitoLume #WebDesignItalia #SitiWeb #PiccoleImprese",
+  "tts_script": "Da visitatore a contatto: ogni dettaglio del tuo sito ha un ruolo. Una presentazione autentica, servizi chiari e un modo semplice per chiedere informazioni. Sito Lume crea esperienze digitali curate per imprese in tutta Italia.",
+  "status": "visual-assets-only-until-voice-and-review",
+  "production": {
+    "visuals": "verified",
+    "ryan_audio": "verified",
+    "serena_audio": "verified",
+    "ryan_reel": "verified",
+    "serena_reel": "verified",
+    "cinematic_ryan": "verified",
+    "cinematic_serena": "verified",
+    "instagram_posted": false,
+    "direct_messages_supported": false,
+    "host": "public GitHub assets (not Instagram)"
+  }
+}
